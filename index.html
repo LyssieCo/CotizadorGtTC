@@ -51,7 +51,7 @@
 <body>
   <h1>Cotizador de productos</h1>
 
-  <form name="cotizacion-form">
+  <form id="cotizacion-form">
     <div class="producto">
       <label for="TN1060">Cartucho TN1060</label>
       <input type="number" name="Cartucho TN1060" min="0" value="0" />
@@ -104,40 +104,41 @@
   </form>
 
   <script>
-    const scriptURL = "https://hook.us2.make.com/m0129cjfhe1xr4eq3vj463xl2q7oglrq";
-    const form = document.forms["cotizacion-form"];
+    const form = document.getElementById("cotizacion-form");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
 
-      const productosSeleccionados = [...document.querySelectorAll('input[type="number"]')]
+      const productos = [...form.querySelectorAll('input[type="number"]')]
         .filter(input => parseInt(input.value) > 0)
         .map(input => `${input.name}: ${input.value}`)
         .join(" | ");
 
+      const nombre = form.nombre.value;
+      const contacto = form.contacto.value;
+      const rubro = form.rubro.value;
+
       const data = {
-        nombre: form.nombre.value,
-        contacto: form.contacto.value,
-        rubro: form.rubro.value,
-        productos: productosSeleccionados
+        nombre,
+        contacto,
+        rubro,
+        productos
       };
 
-      fetch(scriptURL, {
+      fetch("https://hook.us2.make.com/6wscqi2wte3qm61iwwe2j5rvyia6x1mq", {
         method: "POST",
         body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
+        headers: {
+          "Content-Type": "application/json"
+        }
       })
       .then(() => {
-        const mensaje = encodeURIComponent(`Hola, quiero cotizar:
-
-${productosSeleccionados}
-
-Nombre: ${data.nombre}
-Contacto: ${data.contacto}
-Rubro: ${data.rubro}`);
+        const mensaje = encodeURIComponent(`Hola, quiero cotizar:\n\n${productos}\n\nNombre: ${nombre}\nContacto: ${contacto}\nRubro: ${rubro}`);
         window.open(`https://wa.me/5491154095537?text=${mensaje}`, "_blank");
       })
-      .catch((error) => alert("Error al enviar cotización: " + error));
+      .catch((err) => {
+        alert("Error al enviar: " + err.message);
+      });
     });
   </script>
 </body>
